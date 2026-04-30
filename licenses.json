@@ -1,0 +1,38 @@
+{
+  "maintenance": false,
+  "maintenance_message": "Server maintenance is running.",
+  "min_version": "1.0",
+  "notice": "Welcome to JomiMap Pro",
+  "apps": {
+    "jomimap_pro": {
+      "enabled": true,
+      "notice": "JomiMap Pro license server active",
+      "licenses": [
+        {
+          "android_id": "abc123456789",
+          "name": "Mamun",
+          "phone": "01XXXXXXXXX",
+          "license_key": "JOMI-LIFE-001",
+          "plan": "lifetime",
+          "status": "active",
+          "expiry": "2099-12-31",
+          "features": ["all"],
+          "device_model": "",
+          "created_at": "2026-04-30"
+        },
+        {
+          "android_id": "def987654321",
+          "name": "User 2",
+          "phone": "01XXXXXXXXX",
+          "license_key": "JOMI-MONTH-002",
+          "plan": "monthly",
+          "status": "blocked",
+          "expiry": "2026-05-30",
+          "features": ["basic", "history"],
+          "device_model": "",
+          "created_at": "2026-04-30"
+        }
+      ]
+    }
+  }
+}
