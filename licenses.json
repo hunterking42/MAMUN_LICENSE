@@ -1,7 +1,7 @@
 {
   "maintenance": false,
   "maintenance_message": "Server maintenance is running.",
-  "min_version": "1.0",
+  "min_version": "1.9",
   "notice": "Welcome to JomiMap Pro",
   "apps": {
     "jomimap_pro": {
