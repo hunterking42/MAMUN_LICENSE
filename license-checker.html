@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <title>License Checker / লাইসেন্স চেকার</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #e8eaf2;
+    }
+    body {
+      min-height: 100vh;
+      padding: 32px 16px;
+      background:
+        radial-gradient(1200px 800px at 10% -10%, rgba(124, 92, 255, 0.35), transparent 60%),
+        radial-gradient(1000px 700px at 110% 110%, rgba(0, 200, 255, 0.25), transparent 55%),
+        linear-gradient(135deg, #0b1020 0%, #131836 50%, #1a1147 100%);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    .wrap { width: 100%; max-width: 720px; }
+    h1 {
+      font-size: 26px;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      background: linear-gradient(90deg, #c4b5fd, #67e8f9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle { color: #aab1cc; font-size: 13px; margin-bottom: 22px; }
+
+    .card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 22px;
+      backdrop-filter: blur(16px) saturate(140%);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+    .card + .card { margin-top: 18px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      letter-spacing: 0.3px;
+      color: #aab1cc;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .row > * { flex: 1 1 200px; }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 15px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(0, 0, 0, 0.25);
+      color: #fff;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    input[type="text"]:focus, select:focus {
+      border-color: #7c5cff;
+      box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.25);
+    }
+
+    .btns { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    button {
+      cursor: pointer;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+      background: linear-gradient(135deg, #7c5cff, #4f46e5);
+      transition: transform .08s, box-shadow .15s, background .15s;
+    }
+    button:hover { box-shadow: 0 8px 24px rgba(124, 92, 255, 0.35); }
+    button:active { transform: translateY(1px); }
+    button.secondary {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+    button[disabled] { opacity: 0.55; cursor: not-allowed; }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 999px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .b-active { background: rgba(34,197,94,0.18); color: #4ade80; border: 1px solid rgba(74,222,128,0.4); }
+    .b-blocked { background: rgba(239,68,68,0.18); color: #fca5a5; border: 1px solid rgba(252,165,165,0.4); }
+    .b-expired { background: rgba(251,146,60,0.18); color: #fdba74; border: 1px solid rgba(253,186,116,0.4); }
+    .b-notfound { background: rgba(148,163,184,0.18); color: #cbd5e1; border: 1px solid rgba(203,213,225,0.4); }
+    .b-trial { background: rgba(56,189,248,0.18); color: #7dd3fc; border: 1px solid rgba(125,211,252,0.4); }
+    .b-lifetime { background: rgba(168,85,247,0.18); color: #d8b4fe; border: 1px solid rgba(216,180,254,0.4); }
+    .b-monthly, .b-yearly { background: rgba(99,102,241,0.18); color: #a5b4fc; border: 1px solid rgba(165,180,252,0.4); }
+
+    .field {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.08);
+      font-size: 14px;
+    }
+    .field:last-child { border-bottom: none; }
+    .field .k { color: #aab1cc; }
+    .field .v { color: #fff; text-align: right; word-break: break-word; max-width: 60%; }
+
+    .status-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+
+    .notice {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(125, 211, 252, 0.3);
+      color: #bae6fd;
+      font-size: 13px;
+    }
+
+    .err {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(252, 165, 165, 0.4);
+      color: #fecaca;
+      font-size: 13px;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .footer {
+      text-align: center;
+      color: #8a91ad;
+      font-size: 12px;
+      margin-top: 18px;
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 22px; }
+      .field .v { max-width: 55%; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>License Checker</h1>
+    <div class="subtitle">লাইসেন্স যাচাই করুন · Verify your license by Android ID</div>
+
+    <div class="card">
+      <label for="appId">App ID / অ্যাপ আইডি</label>
+      <input id="appId" type="text" value="" autocomplete="off" />
+
+      <div style="height:12px"></div>
+
+      <label for="androidId">Android ID / অ্যান্ড্রয়েড আইডি</label>
+      <input id="androidId" type="text" placeholder="e.g. abc123456789" autocomplete="off" />
+
+      <div class="btns">
+        <button id="checkBtn" type="button">Check License / যাচাই</button>
+        <button id="copyBtn" type="button" class="secondary" disabled>Copy Result / কপি</button>
+      </div>
+    </div>
+
+    <div id="result"></div>
+
+    <div class="footer">© License Guard · Powered by GitHub JSON</div>
+  </div>
+
+  <script>
+    // ====== CONFIG ======
+    const LICENSE_URL = "https://raw.githubusercontent.com/USERNAME/REPO/main/licenses.json";
+    const APP_ID = "jomimap_pro";
+    // ====================
+
+    const $ = (id) => document.getElementById(id);
+    const resultEl = $("result");
+    const checkBtn = $("checkBtn");
+    const copyBtn = $("copyBtn");
+    const appIdEl = $("appId");
+    const androidIdEl = $("androidId");
+
+    appIdEl.value = APP_ID;
+
+    // Read query params
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("id")) androidIdEl.value = params.get("id").trim();
+    if (params.get("app")) appIdEl.value = params.get("app").trim();
+
+    let lastResultText = "";
+
+    function escapeHtml(s) {
+      if (s == null) return "";
+      return String(s)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function planBadge(plan) {
+      const p = (plan || "").toLowerCase();
+      const cls = ({
+        lifetime: "b-lifetime", trial: "b-trial",
+        monthly: "b-monthly", yearly: "b-yearly"
+      })[p] || "b-notfound";
+      return `<span class="badge ${cls}">${escapeHtml(p || "n/a")}</span>`;
+    }
+
+    function statusBadge(kind, text) {
+      const map = { active: "b-active", blocked: "b-blocked", expired: "b-expired", notfound: "b-notfound" };
+      return `<span class="badge ${map[kind] || "b-notfound"}">${escapeHtml(text)}</span>`;
+    }
+
+    function daysBetween(future) {
+      try {
+        const d = new Date(future + "T23:59:59");
+        if (isNaN(d.getTime())) return null;
+        const diff = d.getTime() - Date.now();
+        return Math.ceil(diff / (1000 * 60 * 60 * 24));
+      } catch { return null; }
+    }
+
+    function showLoading() {
+      resultEl.innerHTML = `
+        <div class="card">
+          <div><span class="loading"></span>Checking license...</div>
+        </div>`;
+      copyBtn.disabled = true;
+    }
+
+    function showError(msg) {
+      resultEl.innerHTML = `
+        <div class="card">
+          <div class="err">${escapeHtml(msg)}</div>
+        </div>`;
+      copyBtn.disabled = true;
+    }
+
+    function buildResultText(data) {
+      const lines = [];
+      lines.push("=== License Check ===");
+      lines.push("App ID: " + data.appId);
+      lines.push("Android ID: " + data.androidId);
+      lines.push("Status: " + data.statusText);
+      if (data.lic) {
+        lines.push("Name: " + (data.lic.name || ""));
+        lines.push("Phone: " + (data.lic.phone || ""));
+        lines.push("Plan: " + (data.lic.plan || ""));
+        lines.push("License Key: " + (data.lic.license_key || ""));
+        lines.push("Expiry: " + (data.lic.expiry || ""));
+        lines.push("Days Left: " + (data.daysLeft == null ? "n/a" : data.daysLeft));
+        lines.push("Features: " + ((data.lic.features || []).join(", ")));
+      }
+      if (data.notice) lines.push("Notice: " + data.notice);
+      return lines.join("\n");
+    }
+
+    function renderResult(data) {
+      const fields = [];
+      const push = (k, v) => fields.push(`<div class="field"><div class="k">${k}</div><div class="v">${v}</div></div>`);
+
+      push("App ID", escapeHtml(data.appId));
+      push("Android ID", escapeHtml(data.androidId));
+      if (data.lic) {
+        push("Name / নাম", escapeHtml(data.lic.name || "-"));
+        push("Phone / ফোন", escapeHtml(data.lic.phone || "-"));
+        push("Plan / প্ল্যান", planBadge(data.lic.plan));
+        push("License Key", escapeHtml(data.lic.license_key || "-"));
+        push("Expiry / মেয়াদ", escapeHtml(data.lic.expiry || "-"));
+        const dl = data.daysLeft;
+        let dlText;
+        if ((data.lic.plan || "").toLowerCase() === "lifetime") dlText = "Lifetime ∞";
+        else if (dl == null) dlText = "n/a";
+        else if (dl < 0) dlText = `${dl} (expired)`;
+        else dlText = `${dl} day${dl === 1 ? "" : "s"}`;
+        push("Days Left / দিন বাকি", escapeHtml(dlText));
+        push("Features / ফিচার", escapeHtml((data.lic.features || []).join(", ") || "-"));
+        push("Created", escapeHtml(data.lic.created_at || "-"));
+      }
+
+      const noticeBlock = data.notice
+        ? `<div class="notice">${escapeHtml(data.notice)}</div>` : "";
+
+      resultEl.innerHTML = `
+        <div class="card">
+          <div class="status-row">
+            <strong style="font-size:16px;">License Status:</strong>
+            ${statusBadge(data.statusKind, data.statusText)}
+          </div>
+          ${fields.join("")}
+          ${noticeBlock}
+        </div>`;
+      lastResultText = buildResultText(data);
+      copyBtn.disabled = false;
+    }
+
+    async function check() {
+      const appId = (appIdEl.value || "").trim();
+      const androidId = (androidIdEl.value || "").trim();
+      if (!appId) { showError("Please enter an App ID."); return; }
+      if (!androidId) { showError("Please enter an Android ID."); return; }
+
+      showLoading();
+      try {
+        const url = LICENSE_URL + (LICENSE_URL.indexOf("?") >= 0 ? "&" : "?") + "t=" + Date.now();
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+
+        if (data.maintenance) {
+          showError("Server maintenance: " + (data.maintenance_message || "in progress"));
+          return;
+        }
+
+        const apps = data.apps || {};
+        const app = apps[appId];
+        if (!app) {
+          renderResult({
+            appId, androidId,
+            statusKind: "notfound",
+            statusText: "App not found",
+            lic: null, daysLeft: null, notice: data.notice || ""
+          });
+          return;
+        }
+        if (app.enabled === false) {
+          renderResult({
+            appId, androidId,
+            statusKind: "blocked",
+            statusText: "App disabled",
+            lic: null, daysLeft: null,
+            notice: app.notice || data.notice || ""
+          });
+          return;
+        }
+
+        const list = app.licenses || [];
+        let match = null;
+        for (let i = 0; i < list.length; i++) {
+          if ((list[i].android_id || "").toLowerCase() === androidId.toLowerCase()) {
+            match = list[i]; break;
+          }
+        }
+
+        if (!match) {
+          renderResult({
+            appId, androidId,
+            statusKind: "notfound",
+            statusText: "Not Found",
+            lic: null, daysLeft: null,
+            notice: app.notice || data.notice || ""
+          });
+          return;
+        }
+
+        const status = (match.status || "").toLowerCase();
+        const isLifetime = (match.plan || "").toLowerCase() === "lifetime";
+        const dl = isLifetime ? null : daysBetween(match.expiry);
+
+        let kind = "active";
+        let text = "Active";
+        if (status === "blocked" || status === "inactive" || status === "disabled") {
+          kind = "blocked"; text = (match.status || "Blocked");
+        } else if (!isLifetime && dl !== null && dl < 0) {
+          kind = "expired"; text = "Expired";
+        }
+
+        renderResult({
+          appId, androidId,
+          statusKind: kind, statusText: text,
+          lic: match,
+          daysLeft: isLifetime ? null : dl,
+          notice: app.notice || data.notice || ""
+        });
+      } catch (e) {
+        showError("Failed to fetch license JSON. " + (e && e.message ? e.message : ""));
+      }
+    }
+
+    checkBtn.addEventListener("click", check);
+    androidIdEl.addEventListener("keydown", (e) => { if (e.key === "Enter") check(); });
+    copyBtn.addEventListener("click", async () => {
+      if (!lastResultText) return;
+      try {
+        await navigator.clipboard.writeText(lastResultText);
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => copyBtn.textContent = "Copy Result / কপি", 1500);
+      } catch {
+        const ta = document.createElement("textarea");
+        ta.value = lastResultText;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch {}
+        document.body.removeChild(ta);
+      }
+    });
+
+    if (params.get("id")) check();
+  </script>
+</body>
+</html>
